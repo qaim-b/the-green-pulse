@@ -1,0 +1,6 @@
+building_name,floor_area_sqft,num_floors,building_age_years,occupancy_count,hvac_type,insulation_rating,climate_zone,building_type,window_wall_ratio,renewable_pct,led_lighting_pct
+Tower A - Main Office,125000,25,12,1250,Gas Furnace,Fair,Cold,Office,0.40,0,35
+Building B - North Wing,85000,18,8,850,Heat Pump,Good,Cold,Office,0.30,15,75
+Warehouse C,45000,3,25,100,Packaged Rooftop,Poor,Cold,Warehouse,0.20,0,20
+Retail Store - Downtown,12000,2,5,120,Electric Baseboard,Good,Mixed-Humid,Retail,0.35,5,80
+Medical Center,200000,12,18,2000,District Steam,Good,Cold,Healthcare,0.25,10,65
