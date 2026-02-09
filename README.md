@@ -2,7 +2,6 @@
 
 ML-powered carbon analytics tool for buildings. Predicts emissions, scores sustainability, simulates retrofit scenarios, and estimates ROI.
 
-Built with Streamlit, XGBoost, and Plotly.
 
 ## Features
 
@@ -22,4 +21,4 @@ streamlit run app.py
 
 ## Tech Stack
 
-Python, Streamlit, XGBoost, Plotly, FPDF2, FastAPI, SHAP
+Python, Streamlit, XGBoost, (previous Random Forest Model) Plotly, FPDF2, FastAPI, SHAP
