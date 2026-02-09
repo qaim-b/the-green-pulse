@@ -334,7 +334,7 @@ if st.session_state.page == "home":
     <strong>how can we improve sustainability without sacrificing value?</strong>
     <br><br>
     By using AI, we can help building owners make smarter decisions that increase ROI while reducing emissions.
-    This tool uses machine learning trained on the ASHRAE Great Energy Predictor dataset (3,500 building profiles)
+    This tool uses machine learning trained on the ASHRAE Great Energy Predictor dataset (5,000+ commercial building energy profiles)
     to find the sweet spot where environmental impact meets economic sense.
     <br><br>
     <em>It's about smarter buildings for a better future.</em>
@@ -718,7 +718,7 @@ elif st.session_state.page == "scenarios":
     with col1:
         st.metric("Model Precision", "92.0%", help="Accuracy on test set (as reported)")
     with col2:
-        st.metric("Learning Base", "3,500 Buildings", help="ASHRAE Dataset")
+        st.metric("Learning Base", "5,000+ Buildings", help="ASHRAE Dataset")
     with col3:
         st.metric("Speed", "< 0.5s", help="Real-time XGBoost inference")
     
@@ -859,7 +859,7 @@ elif st.session_state.page == "analytics":
         st.metric("Algorithm", "XGBoost Regressor")
         st.metric("Precision (Accuracy)", "92.0%")
         st.metric("Data Source", "ASHRAE / Kaggle")
-        st.metric("Training Set", "3,500 Buildings")
+        st.metric("Training Set", "5,000+ Buildings")
         st.info("""
         **Methodology**
         - Algorithm: Gradient Boosting (XGBoost) for non-linear patterns

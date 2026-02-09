@@ -184,5 +184,5 @@ if __name__ == '__main__':
     print(correlations.head(8))
     
     # save
-    df.to_csv('/home/claude/building_co2_predictor/building_emissions.csv', index=False)
+    df.to_csv('building_emissions.csv', index=False)
     print("\n✓ Saved to building_emissions.csv")
