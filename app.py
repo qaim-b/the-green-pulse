@@ -335,6 +335,8 @@ if st.session_state.page == "home":
     <strong>how can we improve sustainability without sacrificing value?</strong>
     <br><br>
     By using AI, we can help building owners make smarter decisions that increase ROI while reducing emissions.
+    I first prototyped with a Random Forest model, but found XGBoost delivered more consistent accuracy and better efficiency on this dataset.
+    XGBoost captures non-linear patterns while handling mixed building features with strong generalization, which made the insights more reliable.
     This tool uses machine learning trained on the ASHRAE Great Energy Predictor dataset (5,000+ commercial building energy profiles)
     to find the sweet spot where environmental impact meets economic sense.
     <br><br>
