@@ -1033,3 +1033,4 @@ elif st.session_state.page == "analytics":
 # FOOTER
 st.markdown("---")
 st.caption("Sustainability Insight Tool | Model Accuracy: 92% | Designed by Qaim Baaden")
+st.caption("Build: 2026-03-05-preview-v2")
