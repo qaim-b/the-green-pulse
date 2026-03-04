@@ -196,6 +196,13 @@ if "page" not in st.session_state:
 
 # Helper functions
 def encode_building(building_df, prep):
+    # UI-friendly labels mapped to model training labels
+    climate_aliases = {
+        "Hot-Humid (Malaysia/Tropical)": "Hot-Humid"
+    }
+    if "climate_zone" in building_df.columns:
+        building_df["climate_zone"] = building_df["climate_zone"].replace(climate_aliases)
+
     for col in prep["categorical_cols"]:
         if col in building_df.columns:
             le = prep["label_encoders"][col]
