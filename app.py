@@ -284,7 +284,7 @@ def render_building_preview(building_name, floor_area, num_floors, window_ratio,
     fig.add_shape(type="line", x0=crane_x, x1=crane_x, y0=0.14, y1=0.82, line=dict(color="#586760", width=5))
     fig.add_shape(type="line", x0=crane_x - 0.23, x1=crane_x + 0.05, y0=0.79, y1=0.79, line=dict(color="#586760", width=4))
     fig.add_shape(type="line", x0=crane_x - 0.10, x1=crane_x - 0.10, y0=0.79, y1=max(built_top + 0.02, 0.2), line=dict(color="#586760", width=2))
-    fig.add_shape(type="rect", x0=crane_x - 0.12, x1=crane_x - 0.08, y0=max(built_top - 0.015, 0.18), y1=max(built_top + 0.015, 0.22), line_width=0, fillcolor="#D4A373")
+    fig.add_shape(type="rect", x0=crane_x - 0.12, x1=crane_x - 0.08, y0=max(built_top - 0.015, 0.18), y1=max(built_top + 0.015, 0.22), line_width=0, fillcolor="#6F7C74")
 
     # Front windows
     n_cols = int(np.clip(round(4 + area_norm * 8), 4, 12))
@@ -403,6 +403,7 @@ def generate_pdf_report(building_name, building_data, prediction, leed_assessmen
     pdf.cell(0, 8, "Top Recommendations", ln=True)
     pdf.set_font("Arial", "", 10)
     for i, rec in enumerate(recommendations[:5], 1):
+        pdf.set_x(pdf.l_margin)
         pdf.multi_cell(0, 6, f"{i}. {rec['action']} - Reduction: {rec['savings']:.1f} tons ({rec['percent']:.1f}%)")
     return pdf.output(dest="S").encode("latin-1")
 
