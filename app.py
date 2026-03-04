@@ -215,6 +215,126 @@ def predict_emissions(building_data):
     prediction = model.predict(encoded_df)[0]
     return prediction
 
+def render_building_preview(building_name, floor_area, num_floors, window_ratio, renewable_pct):
+    area_norm = np.clip((floor_area - 500) / (500000 - 500), 0, 1)
+    floor_norm = np.clip((num_floors - 1) / (60 - 1), 0, 1)
+    build_progress = np.clip((area_norm * 0.45) + (floor_norm * 0.55), 0, 1)
+
+    building_width = 0.24 + (0.50 * area_norm)
+    building_height = 0.32 + (0.58 * floor_norm)
+    x0, x1 = 0.5 - building_width / 2, 0.5 + building_width / 2
+    y0, y1 = 0.08, 0.08 + building_height
+    current_build_top = y0 + (building_height * build_progress)
+    total_levels = int(np.clip(round(6 + floor_norm * 18), 6, 24))
+    completed_levels = int(np.clip(round(total_levels * build_progress), 1, total_levels))
+
+    display_name = (building_name or "Your Building").strip()
+    if len(display_name) > 36:
+        display_name = f"{display_name[:33]}..."
+
+    fig = go.Figure()
+    # Background layers
+    fig.add_shape(type="rect", x0=0, x1=1, y0=0, y1=1, line_width=0, fillcolor="#F7F9F7")
+    fig.add_shape(type="rect", x0=0, x1=1, y0=0.78, y1=1, line_width=0, fillcolor="#EEF4EF")
+    fig.add_shape(type="rect", x0=0, x1=1, y0=0.02, y1=0.09, line_width=0, fillcolor="#CAD2C5")
+    fig.add_shape(type="rect", x0=0.08, x1=0.92, y0=0.09, y1=0.105, line_width=0, fillcolor="#BFCAB8")
+
+    # Construction crane
+    crane_x = min(max(x1 + 0.06, 0.8), 0.9)
+    fig.add_shape(type="line", x0=crane_x, x1=crane_x, y0=0.09, y1=0.88, line=dict(color="#5F6B63", width=5))
+    fig.add_shape(type="line", x0=crane_x - 0.24, x1=crane_x + 0.06, y0=0.84, y1=0.84, line=dict(color="#5F6B63", width=4))
+    fig.add_shape(type="line", x0=crane_x - 0.11, x1=crane_x - 0.11, y0=0.84, y1=max(current_build_top + 0.03, 0.2), line=dict(color="#5F6B63", width=2))
+    fig.add_shape(type="rect", x0=crane_x - 0.13, x1=crane_x - 0.09, y0=max(current_build_top - 0.01, 0.12), y1=max(current_build_top + 0.03, 0.16), line_width=0, fillcolor="#D4A373")
+
+    # Full volume shell + completed build fill
+    fig.add_shape(type="rect", x0=x0, x1=x1, y0=y0, y1=y1, line=dict(color="#52796F", width=2), fillcolor="#E8EFE8")
+    fig.add_shape(type="rect", x0=x0, x1=x1, y0=y0, y1=current_build_top, line_width=0, fillcolor="#84A98C")
+
+    # Floor deck lines to create a "being built" effect
+    for level in range(1, total_levels):
+        y_level = y0 + building_height * (level / total_levels)
+        line_color = "#6E8F78" if level <= completed_levels else "#C7D6CC"
+        fig.add_shape(type="line", x0=x0, x1=x1, y0=y_level, y1=y_level, line=dict(color=line_color, width=1))
+
+    # Scaffold edges
+    fig.add_shape(type="line", x0=x0 - 0.015, x1=x0 - 0.015, y0=y0, y1=y1, line=dict(color="#8A9A8D", width=2))
+    fig.add_shape(type="line", x0=x1 + 0.015, x1=x1 + 0.015, y0=y0, y1=y1, line=dict(color="#8A9A8D", width=2))
+    for rung_y in np.linspace(y0 + 0.03, y1 - 0.03, 12):
+        fig.add_shape(type="line", x0=x0 - 0.022, x1=x0 - 0.008, y0=rung_y, y1=rung_y, line=dict(color="#8A9A8D", width=1))
+        fig.add_shape(type="line", x0=x1 + 0.008, x1=x1 + 0.022, y0=rung_y, y1=rung_y, line=dict(color="#8A9A8D", width=1))
+
+    n_cols = int(np.clip(round(3 + area_norm * 8), 3, 11))
+    n_rows = int(np.clip(round(5 + floor_norm * 14), 5, 19))
+    wx_gap = building_width / (n_cols + 1)
+    wy_gap = building_height / (n_rows + 1)
+    window_fill = "#F4E4BA" if window_ratio >= 0.25 else "#E8EFE8"
+    window_dark = "#D0DBD0"
+
+    for i in range(n_cols):
+        for j in range(n_rows):
+            cx = x0 + wx_gap * (i + 1)
+            cy = y0 + wy_gap * (j + 1)
+            window_built = cy <= current_build_top - 0.015
+            fig.add_shape(
+                type="rect",
+                x0=cx - wx_gap * 0.18,
+                x1=cx + wx_gap * 0.18,
+                y0=cy - wy_gap * 0.18,
+                y1=cy + wy_gap * 0.18,
+                line_width=0,
+                fillcolor=window_fill if window_built else window_dark,
+            )
+
+    if renewable_pct > 0:
+        panel_count = int(np.clip(round(1 + renewable_pct / 20), 1, 6))
+        panel_gap = building_width / (panel_count + 1)
+        for p in range(panel_count):
+            px = x0 + panel_gap * (p + 1)
+            fig.add_shape(
+                type="rect",
+                x0=px - panel_gap * 0.28,
+                x1=px + panel_gap * 0.28,
+                y0=y1 + 0.005,
+                y1=y1 + 0.03,
+                line=dict(color="#3D5A80", width=1),
+                fillcolor="#98C1D9",
+            )
+
+    # Progress bar
+    fig.add_shape(type="rect", x0=0.08, x1=0.92, y0=0.93, y1=0.955, line=dict(color="#CAD2C5", width=1), fillcolor="#E8EFE8")
+    fig.add_shape(type="rect", x0=0.08, x1=0.08 + (0.84 * build_progress), y0=0.93, y1=0.955, line_width=0, fillcolor="#84A98C")
+
+    fig.add_annotation(
+        x=0.5,
+        y=0.89,
+        text=f"{display_name}",
+        showarrow=False,
+        font=dict(size=17, color="#2F3E46"),
+    )
+    fig.add_annotation(
+        x=0.5,
+        y=0.86,
+        text=f"{num_floors} floors | {int(floor_area):,} sq ft",
+        showarrow=False,
+        font=dict(size=12, color="#52796F"),
+    )
+    fig.add_annotation(
+        x=0.5,
+        y=0.965,
+        text=f"Construction Progress: {int(build_progress * 100)}%",
+        showarrow=False,
+        font=dict(size=11, color="#2F3E46"),
+    )
+    fig.update_xaxes(visible=False, range=[0, 1], fixedrange=True)
+    fig.update_yaxes(visible=False, range=[0, 1], fixedrange=True)
+    fig.update_layout(
+        height=360,
+        margin=dict(l=8, r=8, t=8, b=8),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
 def calculate_improvement_roi(improvement_type, current_emissions, floor_area, building_type):
     roi_data = {
         "Renewable Energy (Solar)": {"cost_per_sqft": 8.5, "reduction_pct": 25, "payback_years": 6, "annual_savings_per_ton": 50},
@@ -477,6 +597,13 @@ elif st.session_state.page == "single":
         window_ratio = st.slider("Window Area", 0.0, 0.5, 0.3, 0.05)
         renewable_pct = st.slider("Solar Energy %", 0, 100, 10)
         led_pct = st.slider("LED Lighting %", 0, 100, 60)
+
+        st.markdown("**Live Building Preview**")
+        st.plotly_chart(
+            render_building_preview(building_name, floor_area, num_floors, window_ratio, renewable_pct),
+            use_container_width=True,
+            config={"displayModeBar": False},
+        )
         
         analyze_btn = st.button("Reveal Footprint", type="primary", use_container_width=True)
     
