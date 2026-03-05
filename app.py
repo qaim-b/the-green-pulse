@@ -218,27 +218,26 @@ def predict_emissions(building_data):
 def render_building_preview(building_name, floor_area, num_floors, window_ratio, renewable_pct):
     area_norm = np.clip((floor_area - 500) / (500000 - 500), 0, 1)
     floor_norm = np.clip((num_floors - 1) / (60 - 1), 0, 1)
-    build_progress = np.clip((area_norm * 0.50) + (floor_norm * 0.50), 0.08, 1)
+    build_progress = np.clip((area_norm * 0.45) + (floor_norm * 0.55), 0, 1)
 
-    building_width = 0.20 + (0.35 * area_norm)
-    building_height = 0.30 + (0.48 * floor_norm)
-    x0, x1 = 0.42 - building_width / 2, 0.42 + building_width / 2
+    building_width = 0.22 + (0.28 * area_norm)
+    building_height = 0.28 + (0.42 * floor_norm)
+    x0, x1 = 0.36 - building_width / 2, 0.36 + building_width / 2
     y0, y1 = 0.12, 0.12 + building_height
     built_top = y0 + (building_height * build_progress)
-    levels = int(np.clip(round(8 + floor_norm * 24), 8, 32))
-    completed_levels = int(np.clip(round(levels * build_progress), 1, levels))
-    depth_x = 0.09 + (0.05 * area_norm)
-    depth_y = 0.05 + (0.02 * floor_norm)
+    levels = int(np.clip(round(8 + floor_norm * 22), 8, 30))
+    completed_levels = int(np.clip(round(levels * build_progress), 0, levels))
+    depth_x = 0.08 + (0.04 * area_norm)
+    depth_y = 0.045 + (0.02 * floor_norm)
 
     display_name = (building_name or "Your Building").strip()
     if len(display_name) > 36:
         display_name = f"{display_name[:33]}..."
 
     fig = go.Figure()
-    fig.add_shape(type="rect", x0=0, x1=1, y0=0, y1=1, line_width=0, fillcolor="#F3F8F4")
-    fig.add_shape(type="rect", x0=0.03, x1=0.97, y0=0.10, y1=0.96, line_width=0, fillcolor="#EAF3EC")
-    fig.add_shape(type="rect", x0=0.05, x1=0.95, y0=0.10, y1=0.14, line_width=0, fillcolor="#C8D5CA")
-    fig.add_shape(type="circle", x0=0.08, x1=0.16, y0=0.83, y1=0.91, line_width=0, fillcolor="#F4E4BA")
+    fig.add_shape(type="rect", x0=0, x1=1, y0=0, y1=1, line_width=0, fillcolor="#F5FAF6")
+    fig.add_shape(type="rect", x0=0.03, x1=0.97, y0=0.10, y1=0.88, line_width=0, fillcolor="#ECF4EE")
+    fig.add_shape(type="rect", x0=0.05, x1=0.95, y0=0.10, y1=0.14, line_width=0, fillcolor="#C9D7CC")
 
     # Isometric shell
     fig.add_shape(type="rect", x0=x0, x1=x1, y0=y0, y1=y1, line=dict(color="#3E5E54", width=2), fillcolor="#D8E7DB")
@@ -280,11 +279,11 @@ def render_building_preview(building_name, floor_area, num_floors, window_ratio,
         )
 
     # Scaffold + crane
-    crane_x = min(x1 + depth_x + 0.07, 0.9)
-    fig.add_shape(type="line", x0=crane_x, x1=crane_x, y0=0.14, y1=0.82, line=dict(color="#586760", width=5))
-    fig.add_shape(type="line", x0=crane_x - 0.23, x1=crane_x + 0.05, y0=0.79, y1=0.79, line=dict(color="#586760", width=4))
-    fig.add_shape(type="line", x0=crane_x - 0.10, x1=crane_x - 0.10, y0=0.79, y1=max(built_top + 0.02, 0.2), line=dict(color="#586760", width=2))
-    fig.add_shape(type="rect", x0=crane_x - 0.12, x1=crane_x - 0.08, y0=max(built_top - 0.015, 0.18), y1=max(built_top + 0.015, 0.22), line_width=0, fillcolor="#6F7C74")
+    crane_x = min(x1 + depth_x + 0.08, 0.88)
+    fig.add_shape(type="line", x0=crane_x, x1=crane_x, y0=0.14, y1=0.80, line=dict(color="#5B6962", width=4))
+    fig.add_shape(type="line", x0=crane_x - 0.22, x1=crane_x + 0.04, y0=0.77, y1=0.77, line=dict(color="#5B6962", width=3))
+    fig.add_shape(type="line", x0=crane_x - 0.09, x1=crane_x - 0.09, y0=0.77, y1=max(built_top + 0.02, 0.2), line=dict(color="#5B6962", width=2))
+    fig.add_shape(type="rect", x0=crane_x - 0.11, x1=crane_x - 0.07, y0=max(built_top - 0.01, 0.18), y1=max(built_top + 0.02, 0.2), line_width=0, fillcolor="#7A8B82")
 
     # Front windows
     n_cols = int(np.clip(round(4 + area_norm * 8), 4, 12))
@@ -322,28 +321,26 @@ def render_building_preview(building_name, floor_area, num_floors, window_ratio,
             )
 
     # Progress track
-    fig.add_shape(type="rect", x0=0.07, x1=0.93, y0=0.905, y1=0.935, line=dict(color="#CBD8CD", width=1), fillcolor="#E3ECE4")
-    fig.add_shape(type="rect", x0=0.07, x1=0.07 + (0.86 * build_progress), y0=0.905, y1=0.935, line_width=0, fillcolor="#7EA58A")
-    progress_x = 0.07 + (0.86 * build_progress)
-    fig.add_shape(type="circle", x0=progress_x - 0.01, x1=progress_x + 0.01, y0=0.901, y1=0.939, line_width=0, fillcolor="#4C6F5E")
+    fig.add_shape(type="rect", x0=0.08, x1=0.92, y0=0.905, y1=0.935, line=dict(color="#CBD8CD", width=1), fillcolor="#E3ECE4")
+    fig.add_shape(type="rect", x0=0.08, x1=0.08 + (0.84 * build_progress), y0=0.905, y1=0.935, line_width=0, fillcolor="#7EA58A")
 
     fig.add_annotation(
         x=0.5,
-        y=0.86,
+        y=0.855,
         text=f"{display_name}",
         showarrow=False,
-        font=dict(size=20, color="#2F3E46"),
+        font=dict(size=18, color="#2F3E46"),
     )
     fig.add_annotation(
         x=0.5,
-        y=0.825,
+        y=0.818,
         text=f"{num_floors} floors | {int(floor_area):,} sq ft",
         showarrow=False,
         font=dict(size=12, color="#52796F"),
     )
     fig.add_annotation(
         x=0.5,
-        y=0.947,
+        y=0.958,
         text=f"Construction Progress: {int(build_progress * 100)}%",
         showarrow=False,
         font=dict(size=11, color="#2F3E46"),
@@ -351,8 +348,8 @@ def render_building_preview(building_name, floor_area, num_floors, window_ratio,
     fig.update_xaxes(visible=False, range=[0, 1], fixedrange=True)
     fig.update_yaxes(visible=False, range=[0, 1], fixedrange=True)
     fig.update_layout(
-        height=420,
-        margin=dict(l=4, r=4, t=4, b=4),
+        height=390,
+        margin=dict(l=8, r=8, t=8, b=8),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
     )
@@ -626,11 +623,12 @@ elif st.session_state.page == "single":
     
     with col_output:
         st.markdown("### Live Building Preview")
-        st.caption("The structure grows as you adjust area and floors.")
+        st.caption("Updates live as you change inputs on the left.")
         st.plotly_chart(
             render_building_preview(building_name, floor_area, num_floors, window_ratio, renewable_pct),
             use_container_width=True,
             config={"displayModeBar": False},
+            key=f"preview-{building_name}-{floor_area}-{num_floors}-{window_ratio}-{renewable_pct}",
         )
 
         if analyze_btn:
