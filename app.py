@@ -230,10 +230,6 @@ def render_building_preview(building_name, floor_area, num_floors, window_ratio,
     depth_x = 0.08 + (0.04 * area_norm)
     depth_y = 0.045 + (0.02 * floor_norm)
 
-    display_name = (building_name or "Your Building").strip()
-    if len(display_name) > 36:
-        display_name = f"{display_name[:33]}..."
-
     fig = go.Figure()
     fig.add_shape(type="rect", x0=0, x1=1, y0=0, y1=1, line_width=0, fillcolor="#F5FAF6")
     fig.add_shape(type="rect", x0=0.03, x1=0.97, y0=0.10, y1=0.88, line_width=0, fillcolor="#ECF4EE")
@@ -326,14 +322,7 @@ def render_building_preview(building_name, floor_area, num_floors, window_ratio,
 
     fig.add_annotation(
         x=0.5,
-        y=0.855,
-        text=f"{display_name}",
-        showarrow=False,
-        font=dict(size=18, color="#2F3E46"),
-    )
-    fig.add_annotation(
-        x=0.5,
-        y=0.818,
+        y=0.84,
         text=f"{num_floors} floors | {int(floor_area):,} sq ft",
         showarrow=False,
         font=dict(size=12, color="#52796F"),
