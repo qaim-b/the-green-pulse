@@ -225,7 +225,7 @@ def render_building_preview(building_name, floor_area, num_floors, window_ratio,
     x0, x1 = 0.36 - building_width / 2, 0.36 + building_width / 2
     y0, y1 = 0.12, 0.12 + building_height
     built_top = y0 + (building_height * build_progress)
-    levels = int(np.clip(round(8 + floor_norm * 22), 8, 30))
+    levels = int(np.clip(num_floors, 1, 60))
     completed_levels = int(np.clip(round(levels * build_progress), 0, levels))
     depth_x = 0.08 + (0.04 * area_norm)
     depth_y = 0.045 + (0.02 * floor_norm)
@@ -287,7 +287,7 @@ def render_building_preview(building_name, floor_area, num_floors, window_ratio,
 
     # Front windows
     n_cols = int(np.clip(round(4 + area_norm * 8), 4, 12))
-    n_rows = int(np.clip(round(6 + floor_norm * 16), 6, 22))
+    n_rows = levels
     wx_gap = building_width / (n_cols + 1)
     wy_gap = building_height / (n_rows + 1)
     lit_window = "#F5E9BF" if window_ratio >= 0.25 else "#E7F1E8"
@@ -402,7 +402,12 @@ def generate_pdf_report(building_name, building_data, prediction, leed_assessmen
     for i, rec in enumerate(recommendations[:5], 1):
         pdf.set_x(pdf.l_margin)
         pdf.multi_cell(0, 6, f"{i}. {rec['action']} - Reduction: {rec['savings']:.1f} tons ({rec['percent']:.1f}%)")
-    return pdf.output(dest="S").encode("latin-1")
+    output_data = pdf.output(dest="S")
+    if isinstance(output_data, str):
+        return output_data.encode("latin-1", errors="replace")
+    if isinstance(output_data, bytearray):
+        return bytes(output_data)
+    return output_data
 
 # SIDEBAR NAVIGATION
 with st.sidebar:
@@ -622,8 +627,6 @@ elif st.session_state.page == "single":
         analyze_btn = st.button("Reveal Footprint", type="primary", use_container_width=True)
     
     with col_output:
-        st.markdown("### Live Building Preview")
-        st.caption("Updates live as you change inputs on the left.")
         st.plotly_chart(
             render_building_preview(building_name, floor_area, num_floors, window_ratio, renewable_pct),
             use_container_width=True,
